@@ -177,44 +177,6 @@ class UIService {
     this.setupViewHistoryButton();
   }
 
-  // ОНОВЛЕНИЙ МЕТОД - тепер просто перезавантажує сторінку
-  setupRefreshButton() {
-    const refreshBtn = document.getElementById('refresh-btn');
-    if (!refreshBtn) return;
-
-    const newRefreshBtn = refreshBtn.cloneNode(true);
-    refreshBtn.parentNode.replaceChild(newRefreshBtn, refreshBtn);
-
-    this.boundHandlers.refresh = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-
-      if (this.isProcessing.refresh) {
-        return;
-      }
-
-      this.isProcessing.refresh = true;
-      
-      // Очищаємо локальний кеш перед перезавантаженням
-      try {
-        // Очищаємо тільки кеш розрахунків, залишаємо ключ доступу
-        const accessKey = localStorage.getItem('accessKey');
-        localStorage.clear();
-        if (accessKey) {
-          localStorage.setItem('accessKey', accessKey);
-        }
-      } catch (error) {
-        console.error('Error clearing cache:', error);
-      }
-      
-      // Перезавантажуємо сторінку
-      window.location.reload();
-    };
-
-    newRefreshBtn.addEventListener('click', this.boundHandlers.refresh);
-  }
-
   setupRemoveHistoryButton() {
     const restoreBtn = document.getElementById('remove-history-btn');
     if (!restoreBtn) return;
