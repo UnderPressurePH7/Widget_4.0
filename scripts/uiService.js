@@ -172,7 +172,6 @@ class UIService {
   }
 
   setupEventListeners() {
-    this.setupRefreshButton();
     this.setupRemoveHistoryButton();
     this.setupViewHistoryButton();
   }
