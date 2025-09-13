@@ -1,0 +1,31 @@
+export const GAME_POINTS = {
+    POINTS_PER_DAMAGE: 1,
+    POINTS_PER_FRAG: 400,
+    POINTS_PER_TEAM_WIN: 2000
+};
+
+export const STATS = {
+    // https://heroku-ws-da606c26bc25.herokuapp.com
+    WEBSOCKET_URL: "aHR0cHM6Ly9oZXJva3Utd3MtZGE2MDZjMjZiYzI1Lmhlcm9rdWFwcC5jb20="
+};
+
+export const CONFIG = {
+  DEBOUNCE_DELAY: 50,
+  THROTTLE_DELAY: 100,
+  SERVER_TIMEOUT: 5000,
+  RETRY_ATTEMPTS: 2,
+  RETRY_DELAY: 500,
+  MIN_RANDOM_DELAY: 50,
+  MAX_RANDOM_DELAY: 300,
+  UI_UPDATE_DELAY: 50,
+  HANGAR_DELAY: 750,
+  BATTLE_DELAY: 300,
+  SERVER_WARMUP_DELAY: 5000
+};
+
+export const CACHE_KEYS = {
+  GAME_STATE: 'gameState',
+  ACCESS_KEY: 'accessKey'
+
+};
+
