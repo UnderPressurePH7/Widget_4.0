@@ -177,6 +177,7 @@ class UIService {
     this.setupViewHistoryButton();
   }
 
+  // ОНОВЛЕНИЙ МЕТОД - тепер просто перезавантажує сторінку
   setupRefreshButton() {
     const refreshBtn = document.getElementById('refresh-btn');
     if (!refreshBtn) return;
@@ -184,7 +185,7 @@ class UIService {
     const newRefreshBtn = refreshBtn.cloneNode(true);
     refreshBtn.parentNode.replaceChild(newRefreshBtn, refreshBtn);
 
-    this.boundHandlers.refresh = async (event) => {
+    this.boundHandlers.refresh = (event) => {
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
@@ -193,27 +194,22 @@ class UIService {
         return;
       }
 
+      this.isProcessing.refresh = true;
+      
+      // Очищаємо локальний кеш перед перезавантаженням
       try {
-        this.isProcessing.refresh = true;
-        newRefreshBtn.disabled = true;
-        newRefreshBtn.textContent = 'Оновлення...';
-
-        await this.core.refreshLocalData();
-        
-        
-        this.lastPlayersData = null;
-        this.lastTeamData = null;
-        this.updatePlayersUI();
-        this.core.saveState();
-
+        // Очищаємо тільки кеш розрахунків, залишаємо ключ доступу
+        const accessKey = localStorage.getItem('accessKey');
+        localStorage.clear();
+        if (accessKey) {
+          localStorage.setItem('accessKey', accessKey);
+        }
       } catch (error) {
-        console.error('Error updating data:', error);
-        this.handleError(error);
-      } finally {
-        this.isProcessing.refresh = false;
-        newRefreshBtn.disabled = false;
-        newRefreshBtn.textContent = 'Оновити дані';
+        console.error('Error clearing cache:', error);
       }
+      
+      // Перезавантажуємо сторінку
+      window.location.reload();
     };
 
     newRefreshBtn.addEventListener('click', this.boundHandlers.refresh);
