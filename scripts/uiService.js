@@ -9,6 +9,7 @@ class UIService {
     this.isProcessing = {};
     this.lastPlayersData = null;
     this.lastTeamData = null;
+    this.core.clearCalculationCache();
     
     this.core.eventsCore.on('statsUpdated', () => {
       this.handleStatsUpdate();
