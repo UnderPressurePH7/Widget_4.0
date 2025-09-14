@@ -21,7 +21,6 @@ h1 {
   font-size: 28px;
 }
 
-/* Вкладки */
 .tabs-container {
   display: flex;
   flex-direction: column;
@@ -79,7 +78,6 @@ h1 {
   to { opacity: 1; }
 }
 
-/* Загальні стилі фільтрів */
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -136,7 +134,6 @@ button:hover {
   gap: 10px;
 }
 
-/* Таблиця битв */
 .battle-table-container {
   width: 100%;
   overflow-x: auto;
@@ -207,7 +204,6 @@ button:hover {
   background-color: rgba(60, 60, 60, 0.7);
 }
 
-/* Найгірший бій */
 .worst-battle {
   background-color: rgba(255, 50, 50, 0.15) !important;
 }
@@ -232,7 +228,6 @@ button:hover {
   font-size: 16px;
 }
 
-/* Найкращий бій */
 .best-battle {
   background-color: rgba(78, 225, 0, 0.15) !important;
 }
@@ -257,7 +252,6 @@ button:hover {
   font-size: 16px;
 }
 
-/* Кольори результатів */
 .victory { color: #4ee100; font-weight: bold; }
 .defeat { color: #ff4040; font-weight: bold; }
 .draw { color: #ffd700; font-weight: bold; }
@@ -267,7 +261,6 @@ button:hover {
 .points { color: #4ee100; }
 .total-points { color: #d580ff; }
 
-/* Загальна статистика */
 .summary-stats, .player-stats-container, .vehicle-stats-container {
   margin-top: 10px;
   margin-bottom: 30px;
@@ -319,7 +312,6 @@ button:hover {
 .stat-value.frags { color: #4ee100; }
 .stat-value.total-points { color: #d580ff; }
 
-/* Контейнер для діаграм */
 .chart-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -335,7 +327,6 @@ button:hover {
   position: relative;
 }
 
-/* Стилі для вкладки гравців */
 .players-table-container,
 .vehicles-table-container {
   overflow-x: auto;
@@ -374,7 +365,28 @@ button:hover {
   background-color: rgba(60, 60, 60, 0.7);
 }
 
-/* Модальне вікно */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.sortable:hover {
+  background-color: rgba(78, 84, 200, 0.2);
+}
+
+.sortable.sort-asc,
+.sortable.sort-desc {
+  background-color: rgba(78, 84, 200, 0.3);
+}
+
+.sort-indicator {
+  color: #4e54c8;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -465,7 +477,6 @@ button:hover {
   padding: 20px;
 }
 
-/* Вкладки в модальному вікні */
 .modal-tabs {
   display: flex;
   gap: 5px;
@@ -569,7 +580,6 @@ button:hover {
   font-size: 14px;
 }
 
-/* Статистика гравців в модальному вікні */
 .modal-players-table-container {
   overflow-x: auto;
 }
@@ -600,7 +610,6 @@ button:hover {
   background-color: rgba(60, 60, 60, 0.7);
 }
 
-/* Аналіз бою в модальному вікні */
 .battle-analysis {
   display: flex;
   flex-direction: column;
@@ -646,7 +655,6 @@ button:hover {
   border-bottom: none;
 }
 
-/* Пагінація */
 .pagination {
   display: flex;
   justify-content: center;
@@ -668,7 +676,6 @@ button:hover {
   background-color: #4e54c8;
 }
 
-/* Підсвічування найгіршого бою в модальному вікні */
 .worst-battle-modal {
   border: 2px solid rgba(255, 50, 50, 0.5) !important;
   box-shadow: 0 10px 30px rgba(255, 50, 50, 0.2) !important;
@@ -691,7 +698,6 @@ button:hover {
   opacity: 0.9; 
 }
 
-/* Підсвічування найкращого бою в модальному вікні */
 .best-battle-modal {
   border: 2px solid rgba(78, 225, 0, 0.5) !important;
   box-shadow: 0 10px 30px rgba(78, 225, 0, 0.2) !important;
@@ -720,7 +726,6 @@ button:hover {
   100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
 }
 
-/* Стилі для оповіщень */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -751,7 +756,6 @@ button:hover {
   background-color: #f44336;
 }
 
-/* Адаптивний дизайн */
 @media (max-width: 1400px) {
   .stats-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

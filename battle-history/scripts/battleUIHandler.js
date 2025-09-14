@@ -12,6 +12,16 @@ class BattleUIHandler {
         this.itemsPerPage = 10;
         this.currentPage = 1;
         
+        this.playersSortState = {
+            column: 'avgDamage',
+            direction: 'desc'
+        };
+        
+        this.vehiclesSortState = {
+            column: 'avgDamage', 
+            direction: 'desc'
+        };
+        
         this.visibleColumns = {
             date: true,
             map: true,
@@ -39,7 +49,6 @@ class BattleUIHandler {
         });
         
         this.dataManager.eventsHistory.on('battleDeleted', (battleId) => {
-
             if (battleId === this.worstBattleId) {
                 this.worstBattleId = null;
             }
@@ -171,6 +180,213 @@ class BattleUIHandler {
                 });
             });
         }
+        
+        this.setupTableSorting();
+    }
+
+    setupTableSorting() {
+        const playersTable = document.querySelector('.players-table');
+        if (playersTable) {
+            const headers = playersTable.querySelectorAll('th[data-sort]');
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortColumn = header.getAttribute('data-sort');
+                    this.sortPlayersTable(sortColumn);
+                });
+            });
+        }
+
+        const vehiclesTable = document.querySelector('.vehicles-table');
+        if (vehiclesTable) {
+            const headers = vehiclesTable.querySelectorAll('th[data-sort]');
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortColumn = header.getAttribute('data-sort');
+                    this.sortVehiclesTable(sortColumn);
+                });
+            });
+        }
+    }
+
+    sortPlayersTable(column) {
+        if (this.playersSortState.column === column) {
+            this.playersSortState.direction = this.playersSortState.direction === 'desc' ? 'asc' : 'desc';
+        } else {
+            this.playersSortState.column = column;
+            this.playersSortState.direction = 'desc';
+        }
+        
+        this.updatePlayersTable();
+        this.updateSortIndicators('.players-table', this.playersSortState);
+    }
+
+    sortVehiclesTable(column) {
+        if (this.vehiclesSortState.column === column) {
+            this.vehiclesSortState.direction = this.vehiclesSortState.direction === 'desc' ? 'asc' : 'desc';
+        } else {
+            this.vehiclesSortState.column = column;
+            this.vehiclesSortState.direction = 'desc';
+        }
+        
+        this.updateVehiclesTable();
+        this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+    }
+
+    updateSortIndicators(tableSelector, sortState) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        const headers = table.querySelectorAll('th[data-sort]');
+        headers.forEach(header => {
+            header.classList.remove('sort-asc', 'sort-desc');
+            const indicator = header.querySelector('.sort-indicator');
+            if (indicator) indicator.remove();
+        });
+
+        const activeHeader = table.querySelector(`th[data-sort="${sortState.column}"]`);
+        if (activeHeader) {
+            activeHeader.classList.add(`sort-${sortState.direction}`);
+            
+            const indicator = document.createElement('span');
+            indicator.className = 'sort-indicator';
+            indicator.textContent = sortState.direction === 'desc' ? ' ▼' : ' ▲';
+            activeHeader.appendChild(indicator);
+        }
+    }
+
+    getSortedPlayersData() {
+        const battles = this.dataManager.getBattlesArray();
+        const playerStats = new Map();
+
+        battles.forEach(battle => {
+            if (!battle.players) return;
+            
+            Object.values(battle.players).forEach(player => {
+                if (!player.name) return;
+                
+                if (!playerStats.has(player.name)) {
+                    playerStats.set(player.name, {
+                        battles: 0,
+                        wins: 0,
+                        damage: 0,
+                        kills: 0,
+                        points: 0
+                    });
+                }
+                
+                const stats = playerStats.get(player.name);
+                stats.battles++;
+                if (battle.win === 1) stats.wins++;
+                stats.damage += player.damage || 0;
+                stats.kills += player.kills || 0;
+                stats.points += player.points || 0;
+            });
+        });
+
+        const playersArray = Array.from(playerStats.entries())
+            .map(([playerName, stats]) => ({
+                name: playerName,
+                battles: stats.battles,
+                wins: stats.wins,
+                winRate: (stats.wins / stats.battles) * 100 || 0,
+                damage: stats.damage,
+                avgDamage: stats.damage / stats.battles || 0,
+                kills: stats.kills,
+                avgKills: stats.kills / stats.battles || 0,
+                points: stats.points
+            }));
+
+        const { column, direction } = this.playersSortState;
+        playersArray.sort((a, b) => {
+            let valueA = a[column];
+            let valueB = b[column];
+            
+            if (typeof valueA === 'string') {
+                valueA = valueA.toLowerCase();
+                valueB = valueB.toLowerCase();
+                if (direction === 'desc') {
+                    return valueB.localeCompare(valueA);
+                } else {
+                    return valueA.localeCompare(valueB);
+                }
+            }
+            
+            if (direction === 'desc') {
+                return valueB - valueA;
+            } else {
+                return valueA - valueB;
+            }
+        });
+
+        return playersArray;
+    }
+
+    getSortedVehiclesData() {
+        const battles = this.dataManager.getBattlesArray();
+        const vehicleStats = {};
+        
+        battles.forEach(battle => {
+            if (!battle.players) return;
+            
+            Object.values(battle.players).forEach(player => {
+                const vehicle = player.vehicle;
+                if (!vehicle) return;
+                
+                if (!vehicleStats[vehicle]) {
+                    vehicleStats[vehicle] = {
+                        battles: 0,
+                        wins: 0,
+                        damage: 0,
+                        kills: 0
+                    };
+                }
+                
+                vehicleStats[vehicle].battles++;
+                
+                if (battle.win === 1) {
+                    vehicleStats[vehicle].wins++;
+                }
+                
+                vehicleStats[vehicle].damage += player.damage || 0;
+                vehicleStats[vehicle].kills += player.kills || 0;
+            });
+        });
+        
+        const vehiclesArray = Object.entries(vehicleStats)
+            .map(([vehicleName, stats]) => ({
+                vehicle: vehicleName,
+                battles: stats.battles,
+                wins: stats.wins,
+                winRate: (stats.wins / stats.battles) * 100 || 0,
+                damage: stats.damage,
+                avgDamage: stats.damage / stats.battles || 0,
+                kills: stats.kills,
+                avgKills: stats.kills / stats.battles || 0
+            }));
+
+        const { column, direction } = this.vehiclesSortState;
+        vehiclesArray.sort((a, b) => {
+            let valueA = a[column];
+            let valueB = b[column];
+            
+            if (typeof valueA === 'string') {
+                valueA = valueA.toLowerCase();
+                valueB = valueB.toLowerCase();
+                if (direction === 'desc') {
+                    return valueB.localeCompare(valueA);
+                } else {
+                    return valueA.localeCompare(valueB);
+                }
+            }
+            
+            if (direction === 'desc') {
+                return valueB - valueA;
+            } else {
+                return valueA - valueB;
+            }
+        });
+
+        return vehiclesArray;
     }
 
     updateColumnVisibility() {
@@ -653,14 +869,13 @@ class BattleUIHandler {
 
             this.chartManager.updatePerformanceCharts();
         } catch (error) {
-            console.error('Error when updating statistics:Error when deleting a battle:', error);
+            console.error('Error when updating statistics:', error);
         }
     }
 
     updatePlayersTab() {
         try {
             this.updatePlayersTable();
-
             this.chartManager.updatePlayerCharts();
         } catch (error) {
             console.error('Error updating the players tab:', error);
@@ -673,48 +888,14 @@ class BattleUIHandler {
         
         tableBody.innerHTML = '';
         
-        const battles = this.dataManager.getBattlesArray();
-        const playerStats = new Map();
-
-        battles.forEach(battle => {
-            if (!battle.players) return;
-            
-            Object.values(battle.players).forEach(player => {
-                if (!player.name) return;
-                
-                if (!playerStats.has(player.name)) {
-                    playerStats.set(player.name, {
-                        battles: 0,
-                        wins: 0,
-                        damage: 0,
-                        kills: 0,
-                        points: 0
-                    });
-                }
-                
-                const stats = playerStats.get(player.name);
-                stats.battles++;
-                if (battle.win === 1) stats.wins++;
-                stats.damage += player.damage || 0;
-                stats.kills += player.kills || 0;
-                stats.points += player.points || 0;
-            });
-        });
-
-        const sortedPlayers = Array.from(playerStats.entries())
-            .map(([playerName, stats]) => ({
-                name: playerName,
-                ...stats,
-                avgDamage: stats.damage / stats.battles || 0
-            }))
-            .sort((a, b) => b.avgDamage - a.avgDamage);
+        const sortedPlayers = this.getSortedPlayersData();
         
         sortedPlayers.forEach((player, index) => {
             try {
                 const row = document.createElement('tr');
-                const winRate = ((player.wins / player.battles) * 100 || 0).toFixed(1);
-                const avgDamage = Math.round(player.damage / player.battles || 0);
-                const avgKills = (player.kills / player.battles || 0).toFixed(1);
+                const winRate = player.winRate.toFixed(1);
+                const avgDamage = Math.round(player.avgDamage);
+                const avgKills = player.avgKills.toFixed(1);
                 
                 row.innerHTML = `
                     <td>${index + 1}</td>
@@ -733,12 +914,13 @@ class BattleUIHandler {
                 console.error('Error creating a player statistics line:', error, player.name);
             }
         });
+        
+        this.setupTableSorting();
     }
 
     updateVehiclesTab() {
         try {
             this.updateVehiclesTable();
-
             this.chartManager.updateVehicleCharts();
         } catch (error) {
             console.error('Error updating the equipment tab:', error);
@@ -750,49 +932,14 @@ class BattleUIHandler {
         if (!tableBody) return;
         
         tableBody.innerHTML = '';
-        const vehicleStats = {};
-        const battles = this.dataManager.getBattlesArray();
         
-        battles.forEach(battle => {
-            if (!battle.players) return;
-            
-            Object.values(battle.players).forEach(player => {
-                const vehicle = player.vehicle;
-                if (!vehicle) return;
-                
-                if (!vehicleStats[vehicle]) {
-                    vehicleStats[vehicle] = {
-                        battles: 0,
-                        wins: 0,
-                        damage: 0,
-                        kills: 0
-                    };
-                }
-                
-                vehicleStats[vehicle].battles++;
-                
-                if (battle.win === 1) {
-                    vehicleStats[vehicle].wins++;
-                }
-                
-                vehicleStats[vehicle].damage += player.damage || 0;
-                vehicleStats[vehicle].kills += player.kills || 0;
-            });
-        });
-        
-        const sortedVehicles = Object.entries(vehicleStats)
-            .map(([vehicleName, stats]) => ({
-                vehicle: vehicleName,
-                ...stats,
-                avgDamage: stats.damage / stats.battles || 0
-            }))
-            .sort((a, b) => b.avgDamage - a.avgDamage);
+        const sortedVehicles = this.getSortedVehiclesData();
         
         sortedVehicles.forEach((vehicle, index) => {
             try {
-                const winRate = ((vehicle.wins / vehicle.battles) * 100 || 0).toFixed(1);
-                const avgDamage = Math.round(vehicle.damage / vehicle.battles || 0);
-                const avgKills = (vehicle.kills / vehicle.battles || 0).toFixed(1);
+                const winRate = vehicle.winRate.toFixed(1);
+                const avgDamage = Math.round(vehicle.avgDamage);
+                const avgKills = vehicle.avgKills.toFixed(1);
                 
                 const row = document.createElement('tr');
                 
@@ -813,6 +960,8 @@ class BattleUIHandler {
                 console.error('Error when creating a vehicle statistics line:', error, vehicle);
             }
         });
+        
+        this.setupTableSorting();
     }
 
     async exportData() {
@@ -906,8 +1055,11 @@ class BattleUIHandler {
             .join('<br>');
     }
 
-    formatDuration(seconds) {
-        if (!seconds) return '0:00';
+    formatDuration(time) {
+        if (!time) return '0:00';
+
+        let seconds = Math.floor(time / 1000);
+
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
