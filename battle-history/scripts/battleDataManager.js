@@ -114,8 +114,7 @@ class BattleDataManager {
         headers: {
           'X-API-Key': accessKey,
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'https://underpressureph7.github.io'
+          'Accept': 'application/json'
         },
         mode: 'cors',
         cache: 'no-cache'

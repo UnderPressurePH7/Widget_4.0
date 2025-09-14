@@ -213,8 +213,13 @@ class UIService {
         this.lastTeamData = null;
         
         this.updatePlayersUI();
-        
-        localStorage.clear();
+
+        try {
+          const { StateManager } = await import('../battle-history/scripts/stateManager.js');
+          StateManager.clearState();
+        } catch (e) {
+          console.warn('StateManager not available to clear state:', e);
+        }
         this.resetTeamStatsUI();
 
       } catch (error) {

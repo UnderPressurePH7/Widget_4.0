@@ -1,6 +1,7 @@
 import BattleDataManager from './battleDataManager.js';
 import BattleUIHandler from './battleUIHandler.js';
 import { STATS } from './constants.js';
+import { StateManager } from './stateManager.js';
 
 class MainHistory {
     constructor() {
@@ -48,9 +49,8 @@ class MainHistory {
 
     async checkAccessKey() {
         try {
-          localStorage.removeItem('accessKey');
-          const urlKey = window.location.search.substring(1);
-          const keyAPI = urlKey || localStorage.getItem('accessKey');
+            const urlKey = window.location.search.substring(1);
+            const keyAPI = urlKey || StateManager.getAccessKey();
           if (!keyAPI) return false;
     
           const baseUrl = atob(STATS.WEBSOCKET_URL)
@@ -61,8 +61,7 @@ class MainHistory {
             headers: {
               'X-API-Key': keyAPI,
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Origin': 'https://underpressureph7.github.io'
+              'Accept': 'application/json'
             },
             mode: 'cors',
             cache: 'no-cache'
@@ -93,7 +92,7 @@ class MainHistory {
       
           if (data && data.success !== false) {
             if (urlKey) {
-              localStorage.setItem('accessKey', urlKey);
+              StateManager.setAccessKey(urlKey);
             }
             return true;
           }

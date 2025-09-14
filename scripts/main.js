@@ -1,6 +1,7 @@
 import CoreService from './coreService.js';
 import UIService from './uiService.js';
 import { STATS } from '../battle-history/scripts/constants.js';
+import { StateManager } from '../battle-history/scripts/stateManager.js';
 
 export default class SquadWidget {
   constructor() {
@@ -55,9 +56,8 @@ export default class SquadWidget {
 
   async checkAccessKey() {
     try {
-      localStorage.removeItem('accessKey');
       const urlKey = window.location.search.substring(1);
-      const keyAPI = urlKey;
+      const keyAPI = urlKey || StateManager.getAccessKey();
       if (!keyAPI) return false;
 
       const baseUrl = atob(STATS.WEBSOCKET_URL);
@@ -68,8 +68,7 @@ export default class SquadWidget {
         headers: {
           'X-API-Key': keyAPI,
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'https://underpressureph7.github.io'
+          'Accept': 'application/json'
         },
         mode: 'cors',
         cache: 'no-cache'
@@ -100,8 +99,8 @@ export default class SquadWidget {
   
       if (data && data.success !== false) {
         if (urlKey) {
-          console.log('Access granted, storing access key in localStorage');
-          localStorage.setItem('accessKey', urlKey);
+
+          StateManager.setAccessKey(urlKey);
         }
         return true;
       }
