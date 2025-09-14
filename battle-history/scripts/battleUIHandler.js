@@ -94,23 +94,46 @@ class BattleUIHandler {
         return battles.length + '_' + JSON.stringify(battles.slice(0, 3).map(b => b.startTime)).slice(0, 50);
     }
 
+    // async initializeUI() {
+    //     try {
+    //         await this.dataManager.loadFromServer();
+            
+    //         this.findBestAndWorstBattle();
+    //         this.updateBattleTable();
+    //         this.updateStats();
+    //         this.setupFilters();
+    //         this.updatePlayersTab();
+    //         this.updateVehiclesTab();
+            
+    //         this.chartManager.initializeCharts();
+    //     } catch (error) {
+    //         console.error('Error during UI initialization:', error);
+    //         this.showNotification('Error loading data', 'error');
+    //     }
+    // }
+
     async initializeUI() {
-        try {
-            await this.dataManager.loadFromServer();
-            
-            this.findBestAndWorstBattle();
-            this.updateBattleTable();
-            this.updateStats();
-            this.setupFilters();
-            this.updatePlayersTab();
-            this.updateVehiclesTab();
-            
-            this.chartManager.initializeCharts();
-        } catch (error) {
-            console.error('Error during UI initialization:', error);
-            this.showNotification('Error loading data', 'error');
-        }
+    try {
+        await this.dataManager.loadFromServer();
+
+        this.findBestAndWorstBattle();
+        this.updateBattleTable();
+        this.updateStats();
+        this.setupFilters();
+
+        this.renderPlayersTable();
+        this.renderVehiclesTable();
+
+        this.updateSortIndicators('.players-table', this.playersSortState);
+        this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+
+        this.chartManager.initializeCharts();
+    } catch (error) {
+        console.error('Error during UI initialization:', error);
+        this.showNotification('Error loading data', 'error');
     }
+}
+
 
     setupTabSystem() {
         const tabButtons = document.querySelectorAll('.tab-btn');
