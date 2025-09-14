@@ -963,7 +963,9 @@ class BattleUIHandler {
     updatePlayersTab() {
         try {
             this.renderPlayersTable();
-            this.updateSortIndicators('.players-table', this.playersSortState);
+            if (this.playersSortState.column) {
+                this.updateSortIndicators('.players-table', this.playersSortState);
+            }
             this.setupTableSorting();
             this.chartManager.updatePlayerCharts();
         } catch (error) {
@@ -973,14 +975,18 @@ class BattleUIHandler {
 
     updatePlayersTable() {
         this.renderPlayersTable();
-        this.updateSortIndicators('.players-table', this.playersSortState);
+        if (this.playersSortState.column) {
+            this.updateSortIndicators('.players-table', this.playersSortState);
+        }
         this.setupTableSorting();
     }
 
     updateVehiclesTab() {
         try {
             this.renderVehiclesTable();
-            this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+            if (this.vehiclesSortState.column) {
+                this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+            }
             this.setupTableSorting();
             this.chartManager.updateVehicleCharts();
         } catch (error) {
@@ -990,7 +996,9 @@ class BattleUIHandler {
 
     updateVehiclesTable() {
         this.renderVehiclesTable();
-        this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+        if (this.vehiclesSortState.column) {
+            this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+        }
         this.setupTableSorting();
     }
 
