@@ -81,12 +81,40 @@ class BattleUIHandler {
             
             this.findBestAndWorstBattle();
         });
+
+        this.setupLifecycleCacheClearing();
     }
 
     invalidateCache() {
         this.cachedPlayersData = null;
         this.cachedVehiclesData = null;
         this.lastDataHash = null;
+    }
+
+    setupLifecycleCacheClearing() {
+        const clearCaches = () => {
+            try {
+                this.invalidateCache();
+                this.dataManager.filteredBattles = [];
+            } catch (e) {
+                console.warn('Failed to clear history caches on lifecycle event:', e);
+            }
+        };
+
+        window.addEventListener('beforeunload', clearCaches);
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                clearCaches();
+                try {
+                    // Re-render tables/charts with fresh computations
+                    this.updateBattleTable();
+                    this.updateStats();
+                    this.updatePlayersTab();
+                    this.updateVehiclesTab();
+                    this.chartManager.updatePerformanceCharts();
+                } catch (_) {}
+            }
+        });
     }
 
     getDataHash() {

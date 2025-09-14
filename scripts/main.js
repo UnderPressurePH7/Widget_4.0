@@ -32,6 +32,7 @@ export default class SquadWidget {
     try {
       this.coreService = new CoreService();
       this.uiService = new UIService(this.coreService);
+      this.setupLifecycleCacheClearing();
       this.initialize();
     } catch (error) {
       console.error('Error initializing services:', error);
@@ -181,5 +182,24 @@ export default class SquadWidget {
       console.error('Error in showAccessDenied:', error);
       alert('Доступ заборонено. Невірний ключ доступу або помилка сервера.');
     }
+  }
+
+  setupLifecycleCacheClearing() {
+    const clearCalcCache = () => {
+      try {
+        this.coreService?.clearCalculationCache();
+      } catch (e) {
+        console.warn('Failed to clear calculation cache on lifecycle event:', e);
+      }
+    };
+
+    window.addEventListener('beforeunload', clearCalcCache);
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        clearCalcCache();
+        try { this.uiService?.updatePlayersUI(); } catch (_) {}
+      }
+    });
   }
 }
