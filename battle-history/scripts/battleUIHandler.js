@@ -22,6 +22,10 @@ class BattleUIHandler {
             direction: 'desc'
         };
         
+        this.cachedPlayersData = null;
+        this.cachedVehiclesData = null;
+        this.lastDataHash = null;
+        
         this.visibleColumns = {
             date: true,
             map: true,
@@ -39,6 +43,7 @@ class BattleUIHandler {
         this.initializeUI();
 
         this.dataManager.eventsHistory.on('statsUpdated', () => {
+            this.invalidateCache();
             this.updateStats();
             this.findBestAndWorstBattle();
         });
@@ -56,6 +61,7 @@ class BattleUIHandler {
                 this.bestBattleId = null;
             }
             
+            this.invalidateCache();
             this.updateBattleTable();
             this.updateStats();
             this.setupFilters();
@@ -66,6 +72,7 @@ class BattleUIHandler {
         });
 
         this.dataManager.eventsHistory.on('dataImported', () => {
+            this.invalidateCache();
             this.updateBattleTable();
             this.updateStats();
             this.setupFilters();
@@ -74,6 +81,17 @@ class BattleUIHandler {
             
             this.findBestAndWorstBattle();
         });
+    }
+
+    invalidateCache() {
+        this.cachedPlayersData = null;
+        this.cachedVehiclesData = null;
+        this.lastDataHash = null;
+    }
+
+    getDataHash() {
+        const battles = this.dataManager.getBattlesArray();
+        return battles.length + '_' + JSON.stringify(battles.slice(0, 3).map(b => b.startTime)).slice(0, 50);
     }
 
     async initializeUI() {
@@ -216,7 +234,7 @@ class BattleUIHandler {
             this.playersSortState.direction = 'desc';
         }
         
-        this.updatePlayersTable();
+        this.renderPlayersTable();
         this.updateSortIndicators('.players-table', this.playersSortState);
     }
 
@@ -228,7 +246,7 @@ class BattleUIHandler {
             this.vehiclesSortState.direction = 'desc';
         }
         
-        this.updateVehiclesTable();
+        this.renderVehiclesTable();
         this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
     }
 
@@ -254,7 +272,13 @@ class BattleUIHandler {
         }
     }
 
-    getSortedPlayersData() {
+    getPlayersData() {
+        const currentHash = this.getDataHash();
+        
+        if (this.cachedPlayersData && this.lastDataHash === currentHash) {
+            return this.cachedPlayersData;
+        }
+
         const battles = this.dataManager.getBattlesArray();
         const playerStats = new Map();
 
@@ -283,7 +307,7 @@ class BattleUIHandler {
             });
         });
 
-        const playersArray = Array.from(playerStats.entries())
+        this.cachedPlayersData = Array.from(playerStats.entries())
             .map(([playerName, stats]) => ({
                 name: playerName,
                 battles: stats.battles,
@@ -296,32 +320,17 @@ class BattleUIHandler {
                 points: stats.points
             }));
 
-        const { column, direction } = this.playersSortState;
-        playersArray.sort((a, b) => {
-            let valueA = a[column];
-            let valueB = b[column];
-            
-            if (typeof valueA === 'string') {
-                valueA = valueA.toLowerCase();
-                valueB = valueB.toLowerCase();
-                if (direction === 'desc') {
-                    return valueB.localeCompare(valueA);
-                } else {
-                    return valueA.localeCompare(valueB);
-                }
-            }
-            
-            if (direction === 'desc') {
-                return valueB - valueA;
-            } else {
-                return valueA - valueB;
-            }
-        });
-
-        return playersArray;
+        this.lastDataHash = currentHash;
+        return this.cachedPlayersData;
     }
 
-    getSortedVehiclesData() {
+    getVehiclesData() {
+        const currentHash = this.getDataHash();
+        
+        if (this.cachedVehiclesData && this.lastDataHash === currentHash) {
+            return this.cachedVehiclesData;
+        }
+
         const battles = this.dataManager.getBattlesArray();
         const vehicleStats = {};
         
@@ -352,7 +361,7 @@ class BattleUIHandler {
             });
         });
         
-        const vehiclesArray = Object.entries(vehicleStats)
+        this.cachedVehiclesData = Object.entries(vehicleStats)
             .map(([vehicleName, stats]) => ({
                 vehicle: vehicleName,
                 battles: stats.battles,
@@ -364,29 +373,107 @@ class BattleUIHandler {
                 avgKills: stats.kills / stats.battles || 0
             }));
 
-        const { column, direction } = this.vehiclesSortState;
-        vehiclesArray.sort((a, b) => {
+        return this.cachedVehiclesData;
+    }
+
+    getSortedPlayersData() {
+        const playersData = this.getPlayersData();
+        const { column, direction } = this.playersSortState;
+        
+        return [...playersData].sort((a, b) => {
             let valueA = a[column];
             let valueB = b[column];
             
             if (typeof valueA === 'string') {
                 valueA = valueA.toLowerCase();
                 valueB = valueB.toLowerCase();
-                if (direction === 'desc') {
-                    return valueB.localeCompare(valueA);
-                } else {
-                    return valueA.localeCompare(valueB);
-                }
+                return direction === 'desc' ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
             }
             
-            if (direction === 'desc') {
-                return valueB - valueA;
-            } else {
-                return valueA - valueB;
-            }
+            return direction === 'desc' ? valueB - valueA : valueA - valueB;
         });
+    }
 
-        return vehiclesArray;
+    getSortedVehiclesData() {
+        const vehiclesData = this.getVehiclesData();
+        const { column, direction } = this.vehiclesSortState;
+        
+        return [...vehiclesData].sort((a, b) => {
+            let valueA = a[column];
+            let valueB = b[column];
+            
+            if (typeof valueA === 'string') {
+                valueA = valueA.toLowerCase();
+                valueB = valueB.toLowerCase();
+                return direction === 'desc' ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
+            }
+            
+            return direction === 'desc' ? valueB - valueA : valueA - valueB;
+        });
+    }
+
+    renderPlayersTable() {
+        const tableBody = document.getElementById('players-table-body');
+        if (!tableBody) return;
+        
+        const fragment = document.createDocumentFragment();
+        const sortedPlayers = this.getSortedPlayersData();
+        
+        sortedPlayers.forEach((player, index) => {
+            const row = document.createElement('tr');
+            const winRate = player.winRate.toFixed(1);
+            const avgDamage = Math.round(player.avgDamage);
+            const avgKills = player.avgKills.toFixed(1);
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${player.name}</td>
+                <td>${player.battles}</td>
+                <td class="wins">${player.wins}</td>
+                <td>${winRate}%</td>
+                <td class="damage">${player.damage.toLocaleString()}</td>
+                <td class="damage">${avgDamage.toLocaleString()}</td>
+                <td class="frags">${player.kills}</td>
+                <td class="frags">${avgKills}</td>
+            `;
+            
+            fragment.appendChild(row);
+        });
+        
+        tableBody.innerHTML = '';
+        tableBody.appendChild(fragment);
+    }
+
+    renderVehiclesTable() {
+        const tableBody = document.getElementById('vehicles-table-body');
+        if (!tableBody) return;
+        
+        const fragment = document.createDocumentFragment();
+        const sortedVehicles = this.getSortedVehiclesData();
+        
+        sortedVehicles.forEach((vehicle, index) => {
+            const row = document.createElement('tr');
+            const winRate = vehicle.winRate.toFixed(1);
+            const avgDamage = Math.round(vehicle.avgDamage);
+            const avgKills = vehicle.avgKills.toFixed(1);
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${vehicle.vehicle}</td>
+                <td>${vehicle.battles}</td>
+                <td class="wins">${vehicle.wins}</td>
+                <td>${winRate}%</td>
+                <td class="damage">${vehicle.damage.toLocaleString()}</td>
+                <td class="damage">${avgDamage.toLocaleString()}</td>
+                <td class="frags">${vehicle.kills}</td>
+                <td class="frags">${avgKills}</td>
+            `;
+            
+            fragment.appendChild(row);
+        });
+        
+        tableBody.innerHTML = '';
+        tableBody.appendChild(fragment);
     }
 
     updateColumnVisibility() {
@@ -875,7 +962,9 @@ class BattleUIHandler {
 
     updatePlayersTab() {
         try {
-            this.updatePlayersTable();
+            this.renderPlayersTable();
+            this.updateSortIndicators('.players-table', this.playersSortState);
+            this.setupTableSorting();
             this.chartManager.updatePlayerCharts();
         } catch (error) {
             console.error('Error updating the players tab:', error);
@@ -883,44 +972,16 @@ class BattleUIHandler {
     }
 
     updatePlayersTable() {
-        const tableBody = document.getElementById('players-table-body');
-        if (!tableBody) return;
-        
-        tableBody.innerHTML = '';
-        
-        const sortedPlayers = this.getSortedPlayersData();
-        
-        sortedPlayers.forEach((player, index) => {
-            try {
-                const row = document.createElement('tr');
-                const winRate = player.winRate.toFixed(1);
-                const avgDamage = Math.round(player.avgDamage);
-                const avgKills = player.avgKills.toFixed(1);
-                
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${player.name}</td>
-                    <td>${player.battles}</td>
-                    <td class="wins">${player.wins}</td>
-                    <td>${winRate}%</td>
-                    <td class="damage">${player.damage.toLocaleString()}</td>
-                    <td class="damage">${avgDamage.toLocaleString()}</td>
-                    <td class="frags">${player.kills}</td>
-                    <td class="frags">${avgKills}</td>
-                `;
-                
-                tableBody.appendChild(row);
-            } catch (error) {
-                console.error('Error creating a player statistics line:', error, player.name);
-            }
-        });
-        
+        this.renderPlayersTable();
+        this.updateSortIndicators('.players-table', this.playersSortState);
         this.setupTableSorting();
     }
 
     updateVehiclesTab() {
         try {
-            this.updateVehiclesTable();
+            this.renderVehiclesTable();
+            this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
+            this.setupTableSorting();
             this.chartManager.updateVehicleCharts();
         } catch (error) {
             console.error('Error updating the equipment tab:', error);
@@ -928,39 +989,8 @@ class BattleUIHandler {
     }
 
     updateVehiclesTable() {
-        const tableBody = document.getElementById('vehicles-table-body');
-        if (!tableBody) return;
-        
-        tableBody.innerHTML = '';
-        
-        const sortedVehicles = this.getSortedVehiclesData();
-        
-        sortedVehicles.forEach((vehicle, index) => {
-            try {
-                const winRate = vehicle.winRate.toFixed(1);
-                const avgDamage = Math.round(vehicle.avgDamage);
-                const avgKills = vehicle.avgKills.toFixed(1);
-                
-                const row = document.createElement('tr');
-                
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${vehicle.vehicle}</td>
-                    <td>${vehicle.battles}</td>
-                    <td class="wins">${vehicle.wins}</td>
-                    <td>${winRate}%</td>
-                    <td class="damage">${vehicle.damage.toLocaleString()}</td>
-                    <td class="damage">${avgDamage.toLocaleString()}</td>
-                    <td class="frags">${vehicle.kills}</td>
-                    <td class="frags">${avgKills}</td>
-                `;
-                
-                tableBody.appendChild(row);
-            } catch (error) {
-                console.error('Error when creating a vehicle statistics line:', error, vehicle);
-            }
-        });
-        
+        this.renderVehiclesTable();
+        this.updateSortIndicators('.vehicles-table', this.vehiclesSortState);
         this.setupTableSorting();
     }
 
