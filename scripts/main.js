@@ -34,7 +34,7 @@ export default class SquadWidget {
       this.uiService = new UIService(this.coreService);
       this.resetAllStatsForReload();
       this.setupLifecycleCacheClearing();
-      this.initialize();
+      this.clearHistoryOnReload().finally(() => this.initialize());
     } catch (error) {
       console.error('Error initializing services:', error);
       this.showAccessDenied();
@@ -212,6 +212,21 @@ export default class SquadWidget {
       this.uiService.updatePlayersUI();
     } catch (e) {
       console.warn('Failed to reset stats on reload:', e);
+    }
+  }
+
+  async clearHistoryOnReload() {
+    try {
+      await this.coreService.clearServerData();
+    } catch (e) {
+      console.warn('Failed to clear server history on reload:', e);
+    } finally {
+      try {
+        this.coreService.resetState();
+        this.coreService.clearCalculationCache();
+        this.uiService.resetTeamStatsUI();
+        this.uiService.updatePlayersUI();
+      } catch (_) {}
     }
   }
 }

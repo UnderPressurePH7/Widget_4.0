@@ -28,7 +28,7 @@ class MainHistory {
 
             this.uiHandler = new BattleUIHandler(this.dataManager);
 
-            this.initialize();
+      this.clearHistoryOnReload().finally(() => this.initialize());
         } catch (error) {
             console.error('Error initializing services:', error);
             this.showError('Error when initializing services');
@@ -38,7 +38,7 @@ class MainHistory {
     async initialize() {
         try {
 
-            await this.dataManager.loadFromServer();
+      await this.dataManager.loadFromServer();
 
             this.uiHandler.initializeUI();
         } catch (error) {
@@ -46,6 +46,14 @@ class MainHistory {
             this.showError('Error loading data');
         }
     }
+
+  async clearHistoryOnReload() {
+    try {
+      await this.dataManager.clearServerData();
+    } catch (e) {
+      console.warn('Failed to clear server history on reload (history page):', e);
+    }
+  }
 
     async checkAccessKey() {
         try {
