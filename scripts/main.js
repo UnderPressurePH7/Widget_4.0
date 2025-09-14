@@ -32,6 +32,7 @@ export default class SquadWidget {
     try {
       this.coreService = new CoreService();
       this.uiService = new UIService(this.coreService);
+      this.resetAllStatsForReload();
       this.setupLifecycleCacheClearing();
       this.initialize();
     } catch (error) {
@@ -201,5 +202,16 @@ export default class SquadWidget {
         try { this.uiService?.updatePlayersUI(); } catch (_) {}
       }
     });
+  }
+
+  resetAllStatsForReload() {
+    try {
+      this.coreService.resetState();
+      this.coreService.clearCalculationCache();
+      this.uiService.resetTeamStatsUI();
+      this.uiService.updatePlayersUI();
+    } catch (e) {
+      console.warn('Failed to reset stats on reload:', e);
+    }
   }
 }

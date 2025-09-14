@@ -83,6 +83,7 @@ class BattleUIHandler {
         });
 
         this.setupLifecycleCacheClearing();
+        this.resetZeroState();
     }
 
     invalidateCache() {
@@ -106,7 +107,7 @@ class BattleUIHandler {
             if (event.persisted) {
                 clearCaches();
                 try {
-                    // Re-render tables/charts with fresh computations
+                    this.resetZeroState();
                     this.updateBattleTable();
                     this.updateStats();
                     this.updatePlayersTab();
@@ -115,6 +116,31 @@ class BattleUIHandler {
                 } catch (_) {}
             }
         });
+    }
+
+    resetZeroState() {
+        try {
+            this.dataManager.filteredBattles = [];
+            const tableBody = document.getElementById('battle-table-body');
+            if (tableBody) tableBody.innerHTML = '';
+
+            const zeroMap = {
+                'total-battles': '0',
+                'total-victories': '0',
+                'win-rate': '0%',
+                'total-damage': '0',
+                'avg-damage': '0',
+                'total-frags': '0',
+                'avg-frags': '0',
+                'total-points': '0'
+            };
+            Object.entries(zeroMap).forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            });
+        } catch (e) {
+            console.warn('Failed to set zero state:', e);
+        }
     }
 
     getDataHash() {
