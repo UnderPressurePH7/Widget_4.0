@@ -228,10 +228,10 @@ class BattleUIHandler {
 
     sortPlayersTable(column) {
         if (this.playersSortState.column === column) {
-            this.playersSortState.direction = this.playersSortState.direction === 'desc' ? 'asc' : 'desc';
+            this.playersSortState.direction = this.playersSortState.direction === 'asc' ? 'desc' : 'asc';
         } else {
             this.playersSortState.column = column;
-            this.playersSortState.direction = 'desc';
+            this.playersSortState.direction = 'asc';
         }
         
         this.renderPlayersTable();
@@ -240,10 +240,10 @@ class BattleUIHandler {
 
     sortVehiclesTable(column) {
         if (this.vehiclesSortState.column === column) {
-            this.vehiclesSortState.direction = this.vehiclesSortState.direction === 'desc' ? 'asc' : 'desc';
+            this.vehiclesSortState.direction = this.vehiclesSortState.direction === 'asc' ? 'desc' : 'asc';
         } else {
             this.vehiclesSortState.column = column;
-            this.vehiclesSortState.direction = 'desc';
+            this.vehiclesSortState.direction = 'asc';
         }
         
         this.renderVehiclesTable();
