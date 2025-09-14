@@ -5,8 +5,7 @@ export const GAME_POINTS = {
 };
 
 export const STATS = {
-    // https://heroku-ws-da606c26bc25.herokuapp.com
-    WEBSOCKET_URL: "aHR0cHM6Ly9oZXJva3Utd3MtZGE2MDZjMjZiYzI1Lmhlcm9rdWFwcC5jb20="
+    WEBSOCKET_URL: "aHR0cHM6Ly9zZXJ2ZXItd3MtM2I2NTQ5YWVkYzY3Lmhlcm9rdWFwcC5jb20v"
 };
 
 export const CONFIG = {
