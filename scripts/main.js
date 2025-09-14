@@ -217,13 +217,16 @@ export default class SquadWidget {
 
   async clearHistoryOnReload() {
     try {
-      await this.coreService.clearServerData();
     } catch (e) {
       console.warn('Failed to clear server history on reload:', e);
     } finally {
       try {
         this.coreService.resetState();
         this.coreService.clearCalculationCache();
+        try {
+          const { StateManager } = await import('../battle-history/scripts/stateManager.js');
+          StateManager.clearState();
+        } catch (_) {}
         this.uiService.resetTeamStatsUI();
         this.uiService.updatePlayersUI();
       } catch (_) {}
