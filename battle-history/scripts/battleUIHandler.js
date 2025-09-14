@@ -228,26 +228,27 @@ class BattleUIHandler {
     setupTableSorting() {
         const playersTable = document.querySelector('.players-table');
         if (playersTable) {
-            const headers = playersTable.querySelectorAll('th[data-sort]');
-            headers.forEach(header => {
-                header.addEventListener('click', () => {
+            playersTable.addEventListener('click', (e) => {
+                const header = e.target.closest('th[data-sort]');
+                if (header) {
                     const sortColumn = header.getAttribute('data-sort');
                     this.sortPlayersTable(sortColumn);
-                });
+                }
             });
         }
 
         const vehiclesTable = document.querySelector('.vehicles-table');
         if (vehiclesTable) {
-            const headers = vehiclesTable.querySelectorAll('th[data-sort]');
-            headers.forEach(header => {
-                header.addEventListener('click', () => {
+            vehiclesTable.addEventListener('click', (e) => {
+                const header = e.target.closest('th[data-sort]');
+                if (header) {
                     const sortColumn = header.getAttribute('data-sort');
                     this.sortVehiclesTable(sortColumn);
-                });
+                }
             });
         }
     }
+
 
     sortPlayersTable(column) {
         if (this.playersSortState.column === column) {
