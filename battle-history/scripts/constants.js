@@ -1,11 +1,10 @@
 export const GAME_POINTS = {
     POINTS_PER_DAMAGE: 1,
     POINTS_PER_FRAG: 400,
-    POINTS_PER_TEAM_WIN: 2000
+    POINTS_PER_TEAM_WIN: 0
 };
 
 export const STATS = {
-    // https://server-ws-3b6549aedc67.herokuapp.com
     WEBSOCKET_URL: "aHR0cHM6Ly9zZXJ2ZXItd3MtM2I2NTQ5YWVkYzY3Lmhlcm9rdWFwcC5jb20="
 };
 
