@@ -386,17 +386,23 @@ class BattleUIHandler {
         });
 
         this.cachedPlayersData = Array.from(playerStats.entries())
-            .map(([playerName, stats]) => ({
-                name: playerName,
-                battles: stats.battles,
-                wins: stats.wins,
-                winRate: (stats.wins / stats.battles) * 100 || 0,
-                damage: stats.damage,
-                avgDamage: stats.damage / stats.battles || 0,
-                kills: stats.kills,
-                avgKills: stats.kills / stats.battles || 0,
-                points: stats.points
-            }));
+            .map(([playerName, stats]) => {
+                // Calculate total points using GAME_POINTS formula: damage * 1 + kills * 400 + team wins * 0
+                const totalPoints = (stats.damage * 1) + (stats.kills * 400) + (stats.wins * 0);
+                
+                return {
+                    name: playerName,
+                    battles: stats.battles,
+                    wins: stats.wins,
+                    winRate: (stats.wins / stats.battles) * 100 || 0,
+                    damage: stats.damage,
+                    avgDamage: stats.damage / stats.battles || 0,
+                    kills: stats.kills,
+                    avgKills: stats.kills / stats.battles || 0,
+                    points: stats.points,
+                    totalPoints: totalPoints
+                };
+            });
 
         this.lastDataHash = currentHash;
         return this.cachedPlayersData;
@@ -513,6 +519,7 @@ class BattleUIHandler {
                 <td class="damage">${avgDamage.toLocaleString()}</td>
                 <td class="frags">${player.kills}</td>
                 <td class="frags">${avgKills}</td>
+                <td class="total-points">${player.totalPoints.toLocaleString()}</td>
             `;
             
             fragment.appendChild(row);
