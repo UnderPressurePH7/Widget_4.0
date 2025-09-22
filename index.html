@@ -9,6 +9,19 @@
 <body>
   <div class="layout-container">
     <div class="card">
+      <div class="summary-stats">
+        <div class="stat-item battle-label"> <span id="battles-count">0/0</span></div>
+        <div class="stat-item battle-stats">
+          <div class="best-row"><span id="best-battle" class="best-battle-value">0</span></div>
+          <div class="worst-row"><span id="worst-battle" class="worst-battle-value">0</span></div>
+        </div>
+        <!-- <div class="stat-item frags-label">Фраги: <span id="total-frags" class="frags-value">0</span></div> -->
+        <div class="stat-item points-label"> <span id="team-now-points" class="points-value">0</span></div>
+        <div class="stat-item points-label"> <span id="team-points" class="points-value">0</span></div>
+        <!-- Приховані елементи для роботи коду -->
+        <div id="team-damage" style="display:none">0</div>
+        <div id="team-frags" style="display:none">0</div>
+      </div>
       <!-- Приховуємо заголовки стовпців -->
       <div class="stats-headers" style="display: none;">
         <div>НІКНЕЙМ</div>
@@ -20,19 +33,7 @@
         <div class="empty-message">Гравців у взводі не знайдено</div>
       </div>
 
-<div class="summary-stats">
-  <div class="stat-item battle-label"> <span id="battles-count">0/0</span></div>
-  <div class="stat-item battle-stats">
-    <div class="best-row"><span id="best-battle" class="best-battle-value">0</span></div>
-    <div class="worst-row"><span id="worst-battle" class="worst-battle-value">0</span></div>
-  </div>
-  <!-- <div class="stat-item frags-label">Фраги: <span id="total-frags" class="frags-value">0</span></div> -->
-  <div class="stat-item points-label"> <span id="team-now-points" class="points-value">0</span></div>
-  <div class="stat-item points-label"> <span id="team-points" class="points-value">0</span></div>
-  <!-- Приховані елементи для роботи коду -->
-  <div id="team-damage" style="display:none">0</div>
-  <div id="team-frags" style="display:none">0</div>
-</div>
+
     </div>
     
     <div class="side-buttons">
