@@ -5,7 +5,8 @@ export const GAME_POINTS = {
 };
 
 export const STATS = {
-    WEBSOCKET_URL: "aHR0cHM6Ly9zZXJ2ZXItd3MtM2I2NTQ5YWVkYzY3Lmhlcm9rdWFwcC5jb20="
+    //WEBSOCKET_URL: "aHR0cHM6Ly9zZXJ2ZXItd3MtM2I2NTQ5YWVkYzY3Lmhlcm9rdWFwcC5jb20="
+    WEBSOCKET_URL: "aHR0cHM6Ly9uZXctc2Vydi0yNzI4OWVmZDk1NjAuaGVyb2t1YXBwLmNvbQ=="
 
 };
 
@@ -28,6 +29,7 @@ export const CACHE_KEYS = {
   ACCESS_KEY: 'accessKey'
 
 };
+
 
 
 
